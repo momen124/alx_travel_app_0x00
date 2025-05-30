@@ -1,45 +1,45 @@
-# listings/models.py
+from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
 
+# Create your models here.
+# listings/models.py
 class Listing(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     location = models.CharField(max_length=100)
-    price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
-    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
+    price_per_night = models.DecimalField(max_digits=8, decimal_places=2)
+    available_from = models.DateField()
+    available_to = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
-    class Meta:
-        ordering = ['-created_at']
 
 class Booking(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='bookings')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
-    start_date = models.DateField()
-    end_date = models.DateField()
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='bookings')
+    check_in = models.DateField()
+    check_out = models.DateField()
+    number_of_guests = models.PositiveIntegerField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} booked {self.listing.title}"
+        return f"{self.user.username} - {self.listing.title} ({self.check_in} to {self.check_out})"
 
-    class Meta:
-        ordering = ['-created_at']
 
 class Review(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
-    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # 1-5 rating
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.user.username}'s review for {self.listing.title}"
-
     class Meta:
-        ordering = ['-created_at']
+        unique_together = ('user', 'listing')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.listing.title} ({self.rating}/5)"
