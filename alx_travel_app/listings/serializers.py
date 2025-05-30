@@ -1,18 +1,71 @@
-# alx_travel_app/listings/serializers.py
+from .models import Property, Review, Booking, User
 from rest_framework import serializers
-from .models import Listing, Booking
 
-class ListingSerializer(serializers.ModelSerializer):
-    host_username = serializers.ReadOnlyField(source='host.username')
 
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Listing
-        fields = ['id', 'title', 'description', 'location', 'price_per_night', 'host', 'host_username', 'created_at', 'updated_at']
+        model = User
+        fields = [
+            'user_id',
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'role',
+            'created_at'
+        ]
+        read_only_fields = ['user_id', 'created_at']
+
+
+class PropertySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = [
+            'property_id',
+            'host_id',
+            'name',
+            'description',
+            'location',
+            'price_per_night',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['property_id',
+                            'host_id' 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        # Automatically set the host as the currently authenticated user
+        validated_data['host_id'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = [
+            'review_id',
+            'property_id',
+            'user_id',
+            'rating',
+            'comment',
+            'created_at'
+        ]
+
+        read_only_fields = ['review_id', 'created_at']
+
 
 class BookingSerializer(serializers.ModelSerializer):
-    listing_title = serializers.ReadOnlyField(source='listing.title')
-    user_username = serializers.ReadOnlyField(source='user.username')
+    total_price = serializers.ReadOnlyField()
 
     class Meta:
         model = Booking
-        fields = ['id', 'listing', 'listing_title', 'user', 'user_username', 'start_date', 'end_date', 'total_price', 'created_at']
+        fields = [
+            'booking_id',
+            'property_id',
+            'user_id',
+            'start_date',
+            'end_date',
+            'created_at'
+        ]
+
+        read_only_fields = ['booking_id', 'total_price', 'created_at']
