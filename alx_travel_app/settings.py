@@ -11,27 +11,26 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
 import environ
+import os
 
-# Initialize environment variables
-env = environ.Env()
-environ.Env.read_env()  # Reads the .env file
-
-#print(env('DJANGO_SECRET_KEY'))
+env = environ.Env(DEBUG=(bool, False))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load operating system environment variables and then prepare to use them
+env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY', default='fallback_secret_key')
-# SECRET_KEY = 'django-insecure-p1hsa4j*3^1eee+r9v5yelvs1q*m@om#cm#t^p8n83@l6vp$^+'
+SECRET_KEY = 'django-insecure-8mmhuxb#xo)d@kphb^p!ysc$slwkq_*yf+2eo4io-(kr1a50p!'
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -46,10 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'drf_yasg',
-    'maintravelapp',
     'corsheaders',
-    'listings',
+    'alx_travel_app.listings',
 ]
 
 MIDDLEWARE = [
@@ -60,8 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'alx_travel_app.urls'
@@ -88,21 +83,10 @@ WSGI_APPLICATION = 'alx_travel_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'alx_travel_db',
-#         'USER': 'root',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',  # (e.g., '127.0.0.1' or a cloud provider)
-#         'PORT': '3306',  # Default MySQL port
-#     }
-# }
-
-# # Database configuration
 DATABASES = {
-    'default': env.db('DATABASE_URL')  # This will automatically parse the database URL from the .env
+    'default': env.db()
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

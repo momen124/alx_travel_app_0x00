@@ -1,38 +1,27 @@
-# listings/management/commands/seed.py
-
-from django.core.management.base import BaseCommand
-from listings.models import Listing
-from django.contrib.auth.models import User
-from faker import Faker
+"""Populates the database with seed data for listings."""
 import random
-from datetime import datetime, timedelta
+from django.core.management.base import BaseCommand
+from alx_travel_app.listings.models import Listing
+from django.contrib.auth.models import User
 
 class Command(BaseCommand):
-    help = 'Seed the database with sample Listing data'
+    help = 'Populates the database with seed data for listings.'
 
-    def handle(self, *args, **kwargs):
-        fake = Faker()
-        Listing.objects.all().delete()  # Optional: Clears existing data
+    def handle(self, *args, **options):
+        Listing.objects.all().delete()
+        user = User.objects.first()
 
-        locations = ['Paris', 'New York', 'Tokyo', 'Sydney', 'Cape Town', 'Rome', 'Barcelona', 'Dubai', 'Singapore', 'London']
+        if user is None:
+            self.stdout.write(self.style.WARNING('No user found. Please create a user before seeding the database.'))
+            return
 
-        for _ in range(20):
-            title = fake.sentence(nb_words=4)
-            description = fake.paragraph(nb_sentences=5)
-            location = random.choice(locations)
-            price_per_night = round(random.uniform(50, 500), 2)
-            available_from = fake.date_between(start_date='today', end_date='+30d')
-            available_to = available_from + timedelta(days=random.randint(5, 30))
 
-            listing = Listing.objects.create(
-                title=title,
-                description=description,
-                location=location,
-                price_per_night=price_per_night,
-                available_from=available_from,
-                available_to=available_to
+        for i in range(10):
+            Listing.objects.create(
+                host_id=user,
+                name=f'Listing {i}',
+                description=f'This is a description for Listing {i}.',
+                location=f'Location {i}',
+                pricepernight=random.randint(50, 500)
             )
-
-            self.stdout.write(self.style.SUCCESS(f'Created listing: {listing.title}'))
-
-        self.stdout.write(self.style.SUCCESS('Database seeding completed successfully.'))
+        self.stdout.write(self.style.SUCCESS('Successfully seeded the database with listings.'))
