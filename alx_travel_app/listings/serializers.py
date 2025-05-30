@@ -1,18 +1,17 @@
 from rest_framework import serializers
-from rest_framework.contrib.auth.models import User
 from .models import Listing, Booking
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'email']
-
 class ListingSerializer(serializers.ModelSerializer):
+    host_username = serializers.ReadOnlyField(source='host.username')
+
     class Meta:
         model = Listing
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'location', 'price_per_night', 'host', 'host_username', 'created_at', 'updated_at']
 
 class BookingSerializer(serializers.ModelSerializer):
+    listing_title = serializers.ReadOnlyField(source='listing.title')
+    user_username = serializers.ReadOnlyField(source='user.username')
+
     class Meta:
         model = Booking
-        fields = '__all__'
+        fields = ['id', 'listing', 'listing_title', 'user', 'user_username', 'start_date', 'end_date', 'total_price', 'created_at']
